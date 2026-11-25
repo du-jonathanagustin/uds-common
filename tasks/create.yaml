@@ -208,10 +208,11 @@ tasks:
           matches="$(
             uds zarf tools yq -r '
               .components[]
-              | select((.only.flavor // strenv(SBOM_FLAVOR)) == strenv(SBOM_FLAVOR))
+              | select((.selector.flavor // .only.flavor // strenv(SBOM_FLAVOR)) == strenv(SBOM_FLAVOR))
               | .imageArchives[]?
               | . as $archive
               | .images[]?
+              | (.name // .)
               | select(split(":")[0] == strenv(SBOM_IMAGE_REPOSITORY))
               | [$archive.path, .]
               | @tsv
@@ -233,9 +234,10 @@ tasks:
           export SBOM_IMAGE_REF="${image_ref}"
           uds zarf tools yq -i '
             (.components[]
-              | select((.only.flavor // strenv(SBOM_FLAVOR)) == strenv(SBOM_FLAVOR))
+              | select((.selector.flavor // .only.flavor // strenv(SBOM_FLAVOR)) == strenv(SBOM_FLAVOR))
               | .imageArchives[]?
               | .images[]?
+              | (select(tag == "!!map").name, select(tag == "!!str"))
               | select(split(":")[0] == strenv(SBOM_IMAGE_REPOSITORY))) = strenv(SBOM_IMAGE_REF)
           ' "${definition}"
           archive_path="${SBOM_PACKAGE_PATH}/${archive_path}"
