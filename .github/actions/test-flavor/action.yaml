@@ -72,6 +72,8 @@ runs:
           exit 1
         fi
 
-        # Extract upgrade flavors and set output
-        echo "upgrade-flavors=$(yq '.components[] | select(.only | has("flavor")) | .only.flavor' "${PACKAGE_DEFINITION}" | paste -s -d, - || echo '')" >> "$GITHUB_OUTPUT"
+        # Read both package APIs so a v1beta1 release can trigger an upgrade test.
+        flavors=$(yq '.components[] | (.selector.flavor // .only.flavor // "") | select(. != "")' "$PACKAGE_DEFINITION" |
+          sort -u | paste -s -d, -)
+        printf 'upgrade-flavors=%s\n' "$flavors" >> "$GITHUB_OUTPUT"
       shell: bash
