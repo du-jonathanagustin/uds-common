@@ -26,7 +26,7 @@ tasks:
           - ZARF_CONFIG=${{ .inputs.config }}
         cmd: |
           if [ "${FLAVOR}" != "registry1" ] || [ "${{ .inputs.architecture }}" != "arm64" ]; then
-            ./uds zarf package create ${{ .inputs.path }} --confirm --no-progress --architecture="${{ .inputs.architecture }}" --flavor "${FLAVOR}" ${{ .inputs.options }}
+            ./uds zarf package create ${{ .inputs.path }} --confirm --architecture="${{ .inputs.architecture }}" --flavor "${FLAVOR}" ${{ .inputs.options }}
           else
             echo "Registry1 packages cannot be made for 'arm64'"
           fi
