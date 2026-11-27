@@ -96,7 +96,6 @@ tasks:
           # Pulls latest published zarf package
           ./uds zarf package pull \
             "oci://${TARGET_REPO}/${PACKAGE_NAME}:${LATEST_VERSION}" \
-            --no-progress \
             --architecture=${{ .inputs.architecture }} \
             -o ${{ .inputs.path }} \
             --features values=true
