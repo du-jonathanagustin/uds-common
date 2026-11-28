@@ -119,10 +119,11 @@ tasks:
           matches="$(
             uds zarf tools yq -r '
               .components[]
-              | select((.only.flavor // strenv(SBOM_FLAVOR)) == strenv(SBOM_FLAVOR))
+              | select((.selector.flavor // .only.flavor // strenv(SBOM_FLAVOR)) == strenv(SBOM_FLAVOR))
               | .imageArchives[]?
               | . as $archive
               | .images[]?
+              | (.name // .)
               | select(split(":")[0] == strenv(SBOM_IMAGE_REPOSITORY))
               | [$archive.path, .]
               | @tsv
