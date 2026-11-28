@@ -30,6 +30,7 @@ tasks:
         if: ${{ ne .inputs.cpe "" }}
         with:
           cpe: ${{ .inputs.cpe }}
+          architecture: ${{ .inputs.architecture }}
       - env:
           - ZARF_CONFIG=${{ .inputs.config }}
         cmd: ./zarf package create ${{ .inputs.path }} --confirm --architecture="${{ .inputs.architecture }}" --flavor "${FLAVOR}" --features values=true ${{ .inputs.options }}
@@ -76,6 +77,9 @@ tasks:
       cpe:
         description: Complete CPE 2.3 application binding with a wildcard version for the primary product
         required: true
+      architecture:
+        description: The architecture of the package to create
+        default: ${UDS_ARCH}
     actions:
       - description: Build the SBOM shim declared by the active Zarf flavor
         shell:
@@ -84,6 +88,7 @@ tasks:
         env:
           - SBOM_CPE_TEMPLATE=${{ .inputs.cpe }}
           - SBOM_FLAVOR=${FLAVOR}
+          - SBOM_ARCHITECTURE=${{ .inputs.architecture }}
         cmd: |
           set -euo pipefail
 
@@ -120,6 +125,7 @@ tasks:
             uds zarf tools yq -r '
               .components[]
               | select((.selector.flavor // .only.flavor // strenv(SBOM_FLAVOR)) == strenv(SBOM_FLAVOR))
+              | select((.selector.architecture // .only.cluster.architecture // strenv(SBOM_ARCHITECTURE)) == strenv(SBOM_ARCHITECTURE))
               | .imageArchives[]?
               | . as $archive
               | .images[]?
@@ -132,7 +138,7 @@ tasks:
 
           match_count="$(printf '%s\n' "${matches}" | sed '/^$/d' | wc -l | tr -d '[:space:]')"
           if [[ "${match_count}" != "1" ]]; then
-            echo "Expected exactly one ${SBOM_IMAGE_REPOSITORY}:* image archive for flavor '${SBOM_FLAVOR}', found ${match_count}." >&2
+            echo "Expected exactly one ${SBOM_IMAGE_REPOSITORY}:* image archive for flavor '${SBOM_FLAVOR}' and architecture '${SBOM_ARCHITECTURE}', found ${match_count}." >&2
             exit 1
           fi
 
