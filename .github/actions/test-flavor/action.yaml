@@ -73,5 +73,5 @@ runs:
         fi
 
         # Extract upgrade flavors and set output
-        echo "upgrade-flavors=$(yq '.components[] | select(.only | has("flavor")) | .only.flavor' "${PACKAGE_DEFINITION}" | paste -s -d, - || echo '')" >> "$GITHUB_OUTPUT"
+        echo "upgrade-flavors=$(yq '.components[] | (.selector.flavor // .only.flavor) | select(. != null)' "${PACKAGE_DEFINITION}" | paste -s -d, - || echo '')" >> "$GITHUB_OUTPUT"
       shell: bash
