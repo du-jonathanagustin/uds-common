@@ -131,10 +131,9 @@ tasks:
             PREVIOUS_BUNDLE_VERSION=$(./zarf tools yq -r .metadata.version "${{ .inputs.bundle_path }}/uds-bundle.yaml")
           fi
 
-          # Pulls latest published zarf package
+          # Zarf v1 rejects --no-progress on package pull.
           ./zarf package pull \
             "oci://${TARGET_REPO}/${PACKAGE_NAME}:${LATEST_VERSION}" \
-            --no-progress \
             --architecture=${{ .inputs.architecture }} \
             -o ${{ .inputs.path }} \
             --features values=true
